@@ -13,15 +13,17 @@ const initializeFirebase = () => {
       return;
     }
 
-    // Opción 1: Usar archivo de credenciales JSON
-    if (process.env.FIREBASE_SERVICE_ACCOUNT_PATH) {
-      const serviceAccountPath = path.resolve(__dirname, '../..', process.env.FIREBASE_SERVICE_ACCOUNT_PATH);
-      const serviceAccount = require(serviceAccountPath);
+    // Opción 1: Usar Render Secret File
+    const renderSecretPath = '/etc/secrets/firebase-credentials.json';
+    const fs = require('fs');
+    
+    if (fs.existsSync(renderSecretPath)) {
+      const serviceAccount = require(renderSecretPath);
       admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-        databaseURL: process.env.FIREBASE_DATABASE_URL
+        credential: admin.credential.cert(serviceAccount)
       });
-    } 
+      console.log('✅ Firebase inicializado desde Render Secret File');
+    }
     // Opción 2: Usar credenciales desde variables de entorno
     else if (process.env.FIREBASE_PROJECT_ID) {
       admin.initializeApp({
@@ -29,15 +31,14 @@ const initializeFirebase = () => {
           projectId: process.env.FIREBASE_PROJECT_ID,
           clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
           privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n')
-        }),
-        databaseURL: process.env.FIREBASE_DATABASE_URL
+        })
       });
+      console.log('✅ Firebase inicializado desde variables de entorno');
     }
     // Opción 3: Modo desarrollo sin Firebase (simulación)
     else {
       console.warn('⚠️  No hay credenciales de Firebase configuradas');
       console.warn('⚠️  Ejecutando en modo SIMULACIÓN (sin base de datos real)');
-      // No inicializar Firebase, usar almacenamiento en memoria
       return;
     }
 
