@@ -1,0 +1,141 @@
+====================================
+COMANDOS PARA PROBAR EL SERVICIO DE NOTIFICACIONES
+====================================
+
+===========================================
+1. ENVIAR NOTIFICACIÓN A 0512021025@alumnos.unp.edu.pe
+===========================================
+
+PowerShell:
+-----------
+$bodyObject = @{
+    destinatarios = @(
+        @{
+            email = "0512021025@alumnos.unp.edu.pe"
+            nombre = "Estudiante UNP"
+            rol = "estudiante"
+        }
+    )
+    tarea = @{
+        titulo = "Tarea de Programación Web"
+        descripcion = "Desarrollar una aplicación web con Node.js y Express"
+        materia = "Desarrollo de Aplicaciones Web"
+        fecha_entrega = "2025-11-05T23:59:59Z"
+    }
+    profesor = @{
+        nombre = "Prof. García"
+        email = "profesor.garcia@unp.edu.pe"
+    }
+    canal = "email"
+}
+$body = $bodyObject | ConvertTo-Json -Depth 10
+Invoke-RestMethod -Uri "http://localhost:3000/api/notificaciones/nueva-tarea-asignada" -Method POST -Body $body -ContentType "application/json"
+
+
+cURL (Windows CMD):
+-------------------
+curl -X POST http://localhost:3000/api/notificaciones/nueva-tarea-asignada ^
+-H "Content-Type: application/json" ^
+-d "{\"destinatarios\":[{\"email\":\"0512021025@alumnos.unp.edu.pe\",\"nombre\":\"Estudiante UNP\",\"rol\":\"estudiante\"}],\"tarea\":{\"titulo\":\"Tarea de Programación Web\",\"descripcion\":\"Desarrollar una aplicación web con Node.js y Express\",\"materia\":\"Desarrollo de Aplicaciones Web\",\"fecha_entrega\":\"2025-11-05T23:59:59Z\"},\"profesor\":{\"nombre\":\"Prof. García\",\"email\":\"profesor.garcia@unp.edu.pe\"},\"canal\":\"email\"}"
+
+
+cURL (PowerShell):
+------------------
+curl -X POST "http://localhost:3000/api/notificaciones/nueva-tarea-asignada" -H "Content-Type: application/json" -d '{\"destinatarios\":[{\"email\":\"0512021025@alumnos.unp.edu.pe\",\"nombre\":\"Estudiante UNP\",\"rol\":\"estudiante\"}],\"tarea\":{\"titulo\":\"Tarea de Programación Web\",\"descripcion\":\"Desarrollar una aplicación web con Node.js y Express\",\"materia\":\"Desarrollo de Aplicaciones Web\",\"fecha_entrega\":\"2025-11-05T23:59:59Z\"},\"profesor\":{\"nombre\":\"Prof. García\",\"email\":\"profesor.garcia@unp.edu.pe\"},\"canal\":\"email\"}'
+
+
+JSON Body (para Postman o Insomnia):
+-------------------------------------
+{
+  "destinatarios": [
+    {
+      "email": "0512021025@alumnos.unp.edu.pe",
+      "nombre": "Estudiante UNP",
+      "rol": "estudiante"
+    }
+  ],
+  "tarea": {
+    "titulo": "Tarea de Programación Web",
+    "descripcion": "Desarrollar una aplicación web con Node.js y Express",
+    "materia": "Desarrollo de Aplicaciones Web",
+    "fecha_entrega": "2025-11-05T23:59:59Z"
+  },
+  "profesor": {
+    "nombre": "Prof. García",
+    "email": "profesor.garcia@unp.edu.pe"
+  },
+  "canal": "email"
+}
+
+
+===========================================
+2. OBTENER HISTORIAL DE NOTIFICACIONES
+===========================================
+
+PowerShell:
+-----------
+Invoke-RestMethod -Uri "http://localhost:3000/api/notificaciones/historial" -Method GET
+
+# Con límite de resultados (ejemplo: últimas 5)
+Invoke-RestMethod -Uri "http://localhost:3000/api/notificaciones/historial?limit=5" -Method GET
+
+# Con límite de resultados (ejemplo: últimas 10)
+Invoke-RestMethod -Uri "http://localhost:3000/api/notificaciones/historial?limit=10" -Method GET
+
+
+cURL (Windows CMD):
+-------------------
+curl http://localhost:3000/api/notificaciones/historial
+
+# Con límite
+curl http://localhost:3000/api/notificaciones/historial?limit=5
+
+
+cURL (PowerShell):
+------------------
+curl "http://localhost:3000/api/notificaciones/historial"
+
+# Con límite
+curl "http://localhost:3000/api/notificaciones/historial?limit=5"
+
+
+Navegador Web:
+--------------
+http://localhost:3000/api/notificaciones/historial
+http://localhost:3000/api/notificaciones/historial?limit=5
+
+
+===========================================
+3. OTROS ENDPOINTS ÚTILES
+===========================================
+
+Health Check:
+-------------
+PowerShell: Invoke-RestMethod -Uri "http://localhost:3000/health" -Method GET
+cURL: curl http://localhost:3000/health
+Navegador: http://localhost:3000/health
+
+
+Estadísticas:
+-------------
+PowerShell: Invoke-RestMethod -Uri "http://localhost:3000/api/notificaciones/estadisticas" -Method GET
+cURL: curl http://localhost:3000/api/notificaciones/estadisticas
+Navegador: http://localhost:3000/api/notificaciones/estadisticas
+
+
+Info del Servicio:
+------------------
+PowerShell: Invoke-RestMethod -Uri "http://localhost:3000/" -Method GET
+cURL: curl http://localhost:3000/
+Navegador: http://localhost:3000/
+
+
+===========================================
+NOTAS IMPORTANTES
+===========================================
+
+1. Asegúrate de que el servicio esté corriendo en el puerto 3000
+2. Para iniciar el servicio: node src/server.js
+3. El email será enviado a: 0512021025@alumnos.unp.edu.pe
+4. Verifica tu bandeja de entrada (y spam) para confirmar la recepción
+5. Puedes modificar los datos de la tarea según necesites
