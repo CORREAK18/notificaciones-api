@@ -25,12 +25,18 @@ class SchedulerService {
         const fechaCreacion = new Date(tarea.fecha_creacion || tarea.createdAt);
         const fechaEntrega = new Date(tarea.fecha_entrega);
         
-        // Calcular el tiempo total y el punto medio
-        const tiempoTotal = fechaEntrega - fechaCreacion;
-        const puntoMedio = new Date(fechaCreacion.getTime() + (tiempoTotal / 2));
+        // Calcular el tiempo total en horas
+        const tiempoTotalMs = fechaEntrega - fechaCreacion;
+        const horasTotales = tiempoTotalMs / (1000 * 60 * 60); // Convertir ms a horas
+        const horasMitad = horasTotales / 2;
+        
+        // Calcular el punto medio (50% del tiempo en horas)
+        const puntoMedio = new Date(fechaCreacion.getTime() + (horasMitad * 60 * 60 * 1000));
         
         // Verificar si ya pasó el punto medio y aún no se ha enviado recordatorio
         const claveNotificacion = `${tarea.id}-recordatorio`;
+        
+        console.log(`Tarea "${tarea.titulo}": ${horasTotales.toFixed(2)}h totales, mitad: ${horasMitad.toFixed(2)}h, punto medio: ${puntoMedio.toLocaleString('es')}`);
         
         if (ahora >= puntoMedio && ahora < fechaEntrega && !this.tareasNotificadas.has(claveNotificacion)) {
           // Enviar recordatorio a cada estudiante asignado
@@ -96,24 +102,13 @@ class SchedulerService {
       }
     });
 
-    // Procesar pendientes cada 5 minutos
-    cron.schedule('*/5 * * * *', async () => {
-      console.log('Ejecutando: procesar notificaciones pendientes');
-      try {
-        await notificacionService.procesarNotificacionesPendientes();
-      } catch (error) {
-        console.error('Error en scheduler (pendientes):', error);
-      }
-    });
-
     // Verificar recordatorios al iniciar (para testing inmediato)
     setTimeout(() => {
       this.verificarYEnviarRecordatorios();
     }, 5000);
 
     console.log('✓ Tareas programadas iniciadas');
-    console.log('  - Recordatorios automáticos: cada hora');
-    console.log('  - Procesar pendientes: cada 5 minutos');
+    console.log('  - Recordatorios automáticos: cada hora (envío al 50% del tiempo)');
   }
 }
 
